@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Actividad Tema 4 - Plantilla</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+    <div class="container py-5">
+        <h1 class="mb-4">Calculadora y Bucles (Plantilla)</h1>
+
+        <!-- Inputs -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="numero1" class="form-label">Número 1:</label>
+                <input type="number" id="numero1" class="form-control" placeholder="Introduce el primer número">
+            </div>
+            <div class="col-md-6">
+                <label for="numero2" class="form-label">Número 2:</label>
+                <input type="number" id="numero2" class="form-control" placeholder="Introduce el segundo número">
+            </div>
+        </div>
+
+        <!-- Botones de operaciones -->
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            <!-- Ya hecho: botón de suma -->
+            <button class="btn btn-primary" onclick="sumar()">Sumar</button>
+
+            <!-- Por hacer: los alumnos deben añadir botones y funciones para:
+           Restar, Multiplicar, Dividir, Potencia, Módulo -->
+        </div>
+
+        <!-- Resultado -->
+        <div class="alert alert-info" id="resultado">Aquí aparecerá el resultado</div>
+    </div>
+
+    <script>
+        const resultado = document.getElementById("resultado");
+
+        function getNumero1() {
+            return Number(document.getElementById("numero1").value) || 0;
+        }
+
+        function getNumero2() {
+            return Number(document.getElementById("numero2").value) || 0;
+        }
+
+        // --- Operaciones ---
+        function sumar() {
+            let n1 = getNumero1();
+            let n2 = getNumero2();
+            let res = n1 + n2;
+            resultado.innerHTML = `<strong>Resultado de la suma:</strong> ${res}`;
+        }
+
+        // Los alumnos deberán crear aquí las funciones:
+        // restar(), multiplicar(), dividir(), potencia(), modulo()
+        // Y luego añadir sus botones en el HTML
+    </script>
+</body>
+
+</html>
