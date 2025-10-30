@@ -1,6 +1,6 @@
 # 🎃 Ejercicio Práctico: Juego de Halloween
 
-## 👨‍🎓 Estudiantes de 2º DAM DWEC
+## 👨‍🎓 Para Estudiantes de 2º DAM
 
 ¡Bienvenido al ejercicio práctico de JavaScript! En esta actividad vas a completar un juego de Halloween que ya está parcialmente programado.
 
@@ -133,13 +133,18 @@ if (score % 50 === 0) {
 **Ejercicio 3 - Colisiones:**
 ```javascript
 // Dos rectángulos se tocan si:
-return rectA.left < rectB.right &&...
+return rectA.left < rectB.right &&
+       rectA.right > rectB.left &&
+       rectA.top < rectB.bottom &&
+       rectA.bottom > rectB.top;
 ```
 
 **Ejercicio 4 - Reinicio:**
 ```javascript
 // Ejemplo:
 score = 0;
+scoreDisplay.textContent = score;
+gameOverScreen.style.display = 'none';
 ```
 
 ## 🏆 Criterios de Evaluación

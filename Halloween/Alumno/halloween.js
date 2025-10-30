@@ -70,16 +70,16 @@ function setupKeyboardControls() {
         // TODO: Completa el código aquí
         if (e.key === 'ArrowLeft') {
             // TODO: Mueve el jugador hacia la izquierda
-            playerPosition = Math.max(0, xxxx);
+            // Pista: playerPosition = Math.max(0, playerPosition - PLAYER_SPEED);
 
         } else if (e.key === 'ArrowRight') {
             // TODO: Mueve el jugador hacia la derecha  
-            "????";
+            // Pista: playerPosition = Math.min(CONTAINER_WIDTH - PLAYER_WIDTH, playerPosition + PLAYER_SPEED);
 
         }
 
         // TODO: Actualiza la posición visual del jugador
-        player.style.left = "?????";
+        // Pista: player.style.left = playerPosition + 'px';
 
     });
 }
@@ -150,7 +150,10 @@ function checkCollision(obj) {
     // TODO: Completa la detección de colisión
     // Devuelve true si hay colisión, false si no la hay
     // 
-    // Pista: return objRect.left < playerRect.right && etc
+    // Pista: return objRect.left < playerRect.right &&
+    //               objRect.right > playerRect.left &&
+    //               objRect.top < playerRect.bottom &&
+    //               objRect.bottom > playerRect.top;
 
     return false; // Cambia esto por la lógica correcta
 }
