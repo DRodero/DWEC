@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lector de Código QR</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Librería para leer códigos QR -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        
+        .container {
+            max-width: 600px;
+        }
+        
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        #reader {
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .btn-camera {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        
+        .btn-camera:hover {
+            transform: scale(1.05);
+        }
+        
+        .btn-stop {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        #reader video {
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-body text-center p-4">
+                <h1 class="card-title mb-4">
+                    <i class="bi bi-qr-code-scan"></i> Lector de Código QR
+                </h1>
+                
+                <div class="mb-3">
+                    <button id="startButton" class="btn btn-camera btn-primary btn-lg">
+                        📷 Activar Cámara
+                    </button>
+                    <button id="stopButton" class="btn btn-stop btn-danger btn-lg" style="display: none;">
+                        ⏹️ Detener Cámara
+                    </button>
+                </div>
+                
+                <div id="reader"></div>
+                
+                <div id="status" class="alert alert-info mt-3" style="display: none;">
+                    <strong>Estado:</strong> <span id="statusText"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para mostrar el resultado del QR -->
+    <div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="qrModalLabel">
+                        ✅ Código QR Detectado
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 class="fw-bold">Información del QR:</h6>
+                    <div class="alert alert-light">
+                        <p id="qrResult" class="mb-0" style="word-wrap: break-word;"></p>
+                    </div>
+                    
+                    <div id="linkSection" style="display: none;">
+                        <hr>
+                        <p class="text-muted small">Se ha detectado una URL. ¿Deseas visitarla?</p>
+                        <a id="qrLink" href="#" target="_blank" class="btn btn-primary btn-sm">
+                            🔗 Abrir enlace
+                        </a>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" id="scanAgainBtn">Escanear otro</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let html5QrCode;
+        let isScanning = false;
+        const modal = new bootstrap.Modal(document.getElementById('qrModal'));
+        
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const statusDiv = document.getElementById('status');
+        const statusText = document.getElementById('statusText');
+        const qrResult = document.getElementById('qrResult');
+        const linkSection = document.getElementById('linkSection');
+        const qrLink = document.getElementById('qrLink');
+        const scanAgainBtn = document.getElementById('scanAgainBtn');
+
+        // Función para mostrar el estado
+        function showStatus(message, type = 'info') {
+            statusDiv.className = `alert alert-${type} mt-3`;
+            statusText.textContent = message;
+            statusDiv.style.display = 'block';
+        }
+
+        // Función para ocultar el estado
+        function hideStatus() {
+            statusDiv.style.display = 'none';
+        }
+
+        // Función cuando se detecta un QR
+        function onScanSuccess(decodedText, decodedResult) {
+            console.log(`Código QR detectado: ${decodedText}`);
+            
+            // Detener el escáner
+            stopScanner();
+            
+            // Mostrar el resultado en el modal
+            qrResult.textContent = decodedText;
+            
+            // Verificar si es una URL
+            const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+            if (urlPattern.test(decodedText) || decodedText.startsWith('http')) {
+                linkSection.style.display = 'block';
+                qrLink.href = decodedText.startsWith('http') ? decodedText : 'https://' + decodedText;
+            } else {
+                linkSection.style.display = 'none';
+            }
+            
+            // Mostrar el modal
+            modal.show();
+        }
+
+        // Función para manejar errores (se llama constantemente mientras escanea)
+        function onScanError(errorMessage) {
+            // No mostrar errores constantes mientras escanea
+            // console.warn(`Error de escaneo: ${errorMessage}`);
+        }
+
+        // Iniciar el escáner
+        async function startScanner() {
+            if (isScanning) return;
+            
+            try {
+                showStatus('Iniciando cámara...', 'info');
+                
+                html5QrCode = new Html5Qrcode("reader");
+                
+                await html5QrCode.start(
+                    { facingMode: "environment" }, // Usar cámara trasera en móviles
+                    {
+                        fps: 10,    // Frames por segundo
+                        qrbox: { width: 250, height: 250 }  // Área de escaneo
+                    },
+                    onScanSuccess,
+                    onScanError
+                );
+                
+                isScanning = true;
+                startButton.style.display = 'none';
+                stopButton.style.display = 'inline-block';
+                showStatus('Cámara activa. Enfoca un código QR...', 'success');
+                
+            } catch (err) {
+                console.error('Error al iniciar la cámara:', err);
+                showStatus(`Error: ${err.message || 'No se pudo acceder a la cámara'}`, 'danger');
+            }
+        }
+
+        // Detener el escáner
+        function stopScanner() {
+            if (!isScanning || !html5QrCode) return;
+            
+            html5QrCode.stop().then(() => {
+                isScanning = false;
+                startButton.style.display = 'inline-block';
+                stopButton.style.display = 'none';
+                hideStatus();
+                console.log('Escáner detenido');
+            }).catch(err => {
+                console.error('Error al detener el escáner:', err);
+            });
+        }
+
+        // Event Listeners
+        startButton.addEventListener('click', startScanner);
+        stopButton.addEventListener('click', stopScanner);
+        
+        scanAgainBtn.addEventListener('click', () => {
+            modal.hide();
+            startScanner();
+        });
+
+        // Limpiar cuando se cierra la página
+        window.addEventListener('beforeunload', () => {
+            if (isScanning) {
+                stopScanner();
+            }
+        });
+    </script>
+</body>
+</html>
